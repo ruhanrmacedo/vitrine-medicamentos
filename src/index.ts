@@ -1,9 +1,21 @@
 import "reflect-metadata";
 import express from "express";
 import { AppDataSource } from "./config/data-source";
+import cors from "cors"
 
 const app = express();
-app.use(express.json());
+
+import userRouter from "./routes/user.routes";
+import authRouter from "./routes/auth.routes";
+import medicamentosRouter from "./routes/medicamentos.routes";
+import { Request, Response } from "express";
+
+app.use(cors())
+app.use(express.json())
+
+app.use("/users", userRouter)
+app.use("/login", authRouter)
+app.use("/medicamentos", medicamentosRouter)
 
 AppDataSource.initialize()
   .then(() => {
@@ -11,7 +23,7 @@ AppDataSource.initialize()
   })
   .catch((error) => console.log(error));
 
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
   res.send("API funcionando!");
 });
 

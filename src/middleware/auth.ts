@@ -1,0 +1,25 @@
+import { Request, Response, NextFunction } from 'express';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+declare module 'express-serve-static-core' {
+    interface Request {
+        user?: { id: number };
+    }
+}
+
+// Autenticação de usuário com JWT
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Token não fornecido' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, "secreta") as JwtPayload & { id: number };
+        req.user = { id: decoded.id }; 
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: "Token inválido" });
+    }
+};
