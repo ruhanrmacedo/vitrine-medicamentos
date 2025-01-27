@@ -4,11 +4,10 @@ import { User } from "../entities/User";
 
 const userRouter = Router();
 
-// Rota para criar um usuário
+// Cadastrar usuário
 userRouter.post("/", async (req: Request, res: Response) => {
   const { nome, email, senha } = req.body;
 
-  // Obter o repositório do usuário
   const userRepository = AppDataSource.getRepository(User);
 
   // Verificar se o email já existe
@@ -21,7 +20,7 @@ userRouter.post("/", async (req: Request, res: Response) => {
   const user = userRepository.create({ nome, email, senha });
   await userRepository.save(user);
 
-  // Remover a senha do retorno por segurança
+  // Retornar o usuário sem a senha
   const { senha: _, ...userWithoutPassword } = user;
 
   return res.status(201).json(userWithoutPassword);
