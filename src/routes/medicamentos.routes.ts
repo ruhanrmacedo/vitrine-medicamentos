@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import { AppDataSource } from "../config/data-source";
 import { Medicamento } from "../entities/Medicamento";
 import { authMiddleware } from "../middleware/auth";
+import { Like } from "typeorm";
 
 const medicamentosRouter = Router();
 const medicamentoRepository = AppDataSource.getRepository(Medicamento);
@@ -38,24 +39,62 @@ medicamentosRouter.post("/", async (req: Request, res: Response) => {
 });
 
 
-// Rota para listar medicamentos
+// Rota para listar medicamentos com paginação
 medicamentosRouter.get("/all", async (_req: Request, res: Response) => {
     try {
-        const medicamentos = await medicamentoRepository.find({ relations: ["user"] });
-        res.status(200).json(medicamentos);
+        const { page = 1, limit = 10, nome } = _req.query;
+
+        const take = Number(limit); 
+        const skip = (Number(page) - 1) * take; 
+
+        const where = nome ? { nome: Like(`%${nome}%`) } : {}; 
+
+        const [medicamentos, total] = await medicamentoRepository.findAndCount({
+            where,
+            take,
+            skip,
+            relations: ["user"],
+        });
+
+        res.status(200).json({
+            data: medicamentos,
+            total,
+            page: Number(page),
+            totalPages: Math.ceil(total / take),
+        });
     } catch (error) {
-        res.status(500).json({ message: "Erro ao listar medicamentos", error: (error as Error).message });
+        res.status(500).json({ message: "Erro ao listar medicamentos" });
     }
 });
 
-// Rota para buscar medicamento por id do usuário
+// Rota para buscar medicamento por id do usuário com paginação
 medicamentosRouter.get("/", async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const medicamentos = await medicamentoRepository.find({ where: { user: { id: userId } } });
-        res.status(200).json(medicamentos);
+        const { page = 1, limit = 10, nome } = req.query;
+
+        const take = Number(limit); 
+        const skip = (Number(page) - 1) * take; 
+
+        const where = {
+            user: { id: userId },
+            ...(nome ? { nome: Like(`%${nome}%`) } : {}),
+        };
+
+        const [medicamentos, total] = await medicamentoRepository.findAndCount({
+            where,
+            take,
+            skip,
+        });
+
+        res.status(200).json({
+            data: medicamentos,
+            total,
+            page: Number(page),
+            totalPages: Math.ceil(total / take),
+        });
     } catch (error) {
-        res.status(500).json({ message: "Erro ao listar medicamentos do usuário", error: (error as Error).message });
+        res.status(500).json({ message: "Erro ao listar medicamentos do usuário" });
     }
 });
 
