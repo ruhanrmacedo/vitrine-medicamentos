@@ -1,8 +1,12 @@
+import "dotenv/config";
 import { Request, Response, Router } from "express";
 import { AppDataSource } from "../config/data-source";
 import { User } from "../entities/User";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
+ 
+const jwtSecret = process.env.JWT_SECRET || "default_secret";
+const jwtExpiration = process.env.JWT_EXPIRATION || "1h"; // Corrigindo a tipagem
 
 const authRouter = Router()
 
@@ -14,19 +18,22 @@ authRouter.post("/", async (req: Request, res: Response) => {
     const user = await userRepository.findOneBy({ email });
   
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+      res.status(404).json({ message: "Usuário não encontrado" });
+      return; 
     }
   
     // Verificar se a senha está correta
     const isPasswordValid = await bcrypt.compare(senha, user.senha);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Senha incorreta" });
+      res.status(401).json({ message: "Senha incorreta" });
+      return;
     }
   
     // Gerar o token JWT
-    const token = jwt.sign({ id: user.id }, "secreta", { expiresIn: "1h" });
+    const token = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: Number(jwtExpiration) || "1h" });
   
-    return res.json({ token });
+    res.json({ token });
+    return ;
   });
 
   export default authRouter

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
@@ -6,6 +7,8 @@ declare module 'express-serve-static-core' {
         user?: { id: number };
     }
 }
+
+const jwtSecret = process.env.JWT_SECRET || "default_secret";
 
 // Autenticação de usuário com JWT
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -16,7 +19,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     }
 
     try {
-        const decoded = jwt.verify(token, "secreta") as JwtPayload & { id: number };
+        const decoded = jwt.verify(token, jwtSecret) as JwtPayload & { id: number };
         req.user = { id: decoded.id }; 
         next();
     } catch (error) {
