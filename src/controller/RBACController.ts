@@ -35,9 +35,7 @@ export class RBACController {
         try {
             const { description } = req.body;
             if (!description)
-                return res
-                    .status(400)
-                    .json({ message: 'Descrição é obrigatória' });
+                res.status(400).json({ message: 'Descrição é obrigatória' });
 
             const permission = permissionRepository.create({ description });
             await permissionRepository.save(permission);
@@ -85,10 +83,10 @@ export class RBACController {
     async createOneRole(req: Request, res: Response) {
         try {
             const { description } = req.body;
-            if (!description)
-                return res
-                    .status(400)
-                    .json({ message: 'Descrição é obrigatória' });
+            if (!description) {
+                res.status(400).json({ message: 'Descrição é obrigatória' });
+                return;
+            }
 
             const role = roleRepository.create({ description });
             await roleRepository.save(role);
@@ -118,9 +116,7 @@ export class RBACController {
                 relations: ['permissions'],
             });
 
-            if (!role)
-                return res.status(404).json({ message: 'Role não encontrada' });
-            res.json(role.permissions);
+            if (!role) res.status(404).json({ message: 'Role não encontrada' });
             return;
         } catch (error) {
             if (error instanceof Error) {
@@ -151,15 +147,16 @@ export class RBACController {
                 id: Number(permissionId),
             });
 
-            if (!role || !permission)
-                return res
-                    .status(404)
-                    .json({ message: 'Role ou Permissão não encontrada' });
-
+            if (!role || !permission) {
+                res.status(404).json({
+                    message: 'Role ou Permissão não encontrada',
+                });
+                return;
+            }
             role.permissions.push(permission);
             await roleRepository.save(role);
-
-            return res.status(200).json(role);
+            res.status(200).json(role);
+            return;
         } catch (error) {
             if (error instanceof Error) {
                 res.status(500).json({
@@ -187,15 +184,18 @@ export class RBACController {
 
             const role = await roleRepository.findOneBy({ id: Number(roleId) });
 
-            if (!user || !role)
-                return res
-                    .status(404)
-                    .json({ message: 'Usuário ou Role não encontrada' });
+            if (!user || !role) {
+                res.status(404).json({
+                    message: 'Usuário ou Role não encontrada',
+                });
+                return;
+            }
 
             user.roles.push(role);
             await userRepository.save(user);
 
-            return res.status(200).json(user);
+            res.status(200).json(user);
+            return;
         } catch (error) {
             if (error instanceof Error) {
                 res.status(500).json({
