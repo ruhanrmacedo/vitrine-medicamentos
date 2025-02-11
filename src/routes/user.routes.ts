@@ -13,7 +13,8 @@ userRouter.post("/", async (req: Request, res: Response) => {
   // Verificar se o email já existe
   const existingUser = await userRepository.findOneBy({ email });
   if (existingUser) {
-    return res.status(400).json({ message: "Email já cadastrado" });
+    res.status(400).json({ message: "Email já cadastrado" });
+    return;
   }
 
   // Criar um novo usuário
@@ -21,9 +22,10 @@ userRouter.post("/", async (req: Request, res: Response) => {
   await userRepository.save(user);
 
   // Retornar o usuário sem a senha
-  const { senha: _, ...userWithoutPassword } = user;
+  const { senha: _, ...userWithoutSenha } = user;
 
-  return res.status(201).json(userWithoutPassword);
+  res.status(201).json(userWithoutSenha);
+  return;
 });
 
 

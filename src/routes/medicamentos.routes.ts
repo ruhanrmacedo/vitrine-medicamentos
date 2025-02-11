@@ -1,14 +1,14 @@
 import { Request, Response, Router } from "express";
 import { AppDataSource } from "../config/data-source";
 import { Medicamento } from "../entities/Medicamento";
-import { authMiddleware } from "../middleware/auth";
+import { authenticate } from "../middleware/auth";
 import { Like } from "typeorm";
 
 const medicamentosRouter = Router();
 const medicamentoRepository = AppDataSource.getRepository(Medicamento);
 
 // Middleware para autenticação
-medicamentosRouter.use(authMiddleware);
+medicamentosRouter.use(authenticate(["listar_medicamentos"]));
 
 // Rota para cadastrar medicamentos com usuário autenticado
 medicamentosRouter.post("/", async (req: Request, res: Response) => {
@@ -17,11 +17,13 @@ medicamentosRouter.post("/", async (req: Request, res: Response) => {
         const userId = req.user?.id;
 
         if (!userId) {
-            return res.status(401).json({ message: "Usuário não autenticado" });
+            res.status(401).json({ message: "Usuário não autenticado" });
+            return;
         }
 
         if (!nome || !quantidade) {
-            return res.status(400).json({ message: "Nome e quantidade são obrigatórios" });
+            res.status(400).json({ message: "Nome e quantidade são obrigatórios" });
+            return;
         }
 
         const medicamento = medicamentoRepository.create({
@@ -105,12 +107,14 @@ medicamentosRouter.get("/:id", async (req: Request, res: Response) => {
         const medicamento = await medicamentoRepository.findOne({ where: { id: Number(id) }, relations: ["user"] });
 
         if (!medicamento) {
-            return res.status(404).json({ message: "Medicamento não encontrado" });
+            res.status(404).json({ message: "Medicamento não encontrado" });
+            return;
         }
 
         res.status(200).json(medicamento);
     } catch (error) {
         res.status(500).json({ message: "Erro ao buscar medicamento", error: (error as Error).message });
+        return;
     }
 });
 
@@ -124,11 +128,13 @@ medicamentosRouter.put("/:id", async (req: Request, res: Response) => {
         const medicamento = await medicamentoRepository.findOne({ where: { id: Number(id) }, relations: ["user"] });
 
         if (!medicamento) {
-            return res.status(404).json({ message: "Medicamento não encontrado" });
+            res.status(404).json({ message: "Medicamento não encontrado" });
+            return;
         }
 
         if (medicamento.user.id !== userId) {
-            return res.status(403).json({ message: "Acesso negado" });
+            res.status(403).json({ message: "Acesso negado" });
+            return;
         }
 
         const { nome, descricao, quantidade } = req.body;
@@ -139,8 +145,10 @@ medicamentosRouter.put("/:id", async (req: Request, res: Response) => {
 
         await medicamentoRepository.save(medicamento);
         res.status(200).json(medicamento);
+        return;
     } catch (error) {
         res.status(500).json({ message: "Erro ao atualizar medicamento", error: (error as Error).message });
+        return;
     }
 });
 
@@ -153,15 +161,18 @@ medicamentosRouter.delete("/:id", async (req: Request, res: Response) => {
         const medicamento = await medicamentoRepository.findOne({ where: { id: Number(id) }, relations: ["user"] });
 
         if (!medicamento) {
-            return res.status(404).json({ message: "Medicamento não encontrado" });
+            res.status(404).json({ message: "Medicamento não encontrado" });
+            return;
         }
 
         if (medicamento.user.id !== userId) {
-            return res.status(403).json({ message: "Acesso negado" });
+            res.status(403).json({ message: "Acesso negado" });
+            return;
         }
 
         await medicamentoRepository.remove(medicamento);
         res.status(204).send();
+        return;
     } catch (error) {
         res.status(500).json({ message: "Erro ao remover medicamento", error: (error as Error).message });
     }
