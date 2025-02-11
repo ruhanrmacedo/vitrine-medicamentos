@@ -1,27 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, OneToMany,} from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable, BeforeInsert } from "typeorm";
 import bcrypt from "bcrypt";
+import { Role } from "./Role";
 import { Medicamento } from "./Medicamento";
-  
-  @Entity()
-  export class User {
+
+@Entity({ name: "users" })
+export class User {
     @PrimaryGeneratedColumn()
-    id: number = 0;
-  
-    @Column()
-    nome: string = "";
-  
+    id: number;
+
+    @Column({ length: 200 })
+    nome: string;
+
     @Column({ unique: true })
-    email: string = "";
-  
+    email: string;
+
     @Column()
-    senha: string = "";
-  
+    senha: string;
+
     @BeforeInsert()
-    async hashPassword() {
-      this.senha = await bcrypt.hash(this.senha, 10);
+    async hashSenha() {
+        this.senha = await bcrypt.hash(this.senha, 10);
     }
 
     @OneToMany(() => Medicamento, (medicamento) => medicamento.user)
-    medicamentos!: Medicamento[];
-  }
-  
+    medicamentos: Medicamento[];
+
+    @ManyToMany(() => Role, (role) => role.users, { eager: true })
+    @JoinTable({ name: "user_roles", joinColumn: { name: "user_id" }, inverseJoinColumn: { name: "role_id" } })
+    roles: Role[];
+}

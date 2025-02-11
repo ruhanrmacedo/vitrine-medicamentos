@@ -22,9 +22,9 @@ userRouter.post("/", async (req: Request, res: Response) => {
   await userRepository.save(user);
 
   // Retornar o usuário sem a senha
-  const { senha: _, ...userWithoutPassword } = user;
+  const { senha: _, ...userWithoutSenha } = user;
 
-  res.status(201).json(userWithoutPassword);
+  res.status(201).json(userWithoutSenha);
   return;
 });
 

@@ -6,7 +6,7 @@
     "start": "ts-node src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "dev": "ts-node-dev --transpile-only --inspect --respawn  ./src/index.ts",
-    "migration:run": "npx typeorm-ts-node-commonjs -d ./src/database/data-source.ts migration:run"
+    "migration:run": "npx typeorm-ts-node-commonjs -d ./src/config/data-source.ts migration:run"
   },
   "keywords": [],
   "author": "",
