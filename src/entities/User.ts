@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { Role } from "./Role";
 import { Medicamento } from "./Medicamento";
 
-@Entity()
+@Entity({ name: "users" })
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
@@ -26,6 +26,6 @@ export class User {
     medicamentos: Medicamento[];
 
     @ManyToMany(() => Role, (role) => role.users, { eager: true })
-    @JoinTable({ name: "user_roles" })
+    @JoinTable({ name: "user_roles", joinColumn: { name: "user_id" }, inverseJoinColumn: { name: "role_id" } })
     roles: Role[];
 }

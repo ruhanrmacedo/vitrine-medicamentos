@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Role } from "./Role";
 
-@Entity()
+@Entity({ name: "permissions" })
 export class Permission {
     @PrimaryGeneratedColumn()
     id: number;
@@ -16,6 +16,6 @@ export class Permission {
     updatedAt: Date;
 
     @ManyToMany(() => Role, (role) => role.permissions)
-    @JoinTable({ name: "permission_role" })
+    @JoinTable({ name: "permission_role", joinColumn: { name: "permission_id" }, inverseJoinColumn: { name: "role_id" } })
     roles: Role[];
 }

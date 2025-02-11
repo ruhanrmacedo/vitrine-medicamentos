@@ -2,7 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "t
 import { User } from "./User";
 import { Permission } from "./Permission";
 
-@Entity()
+@Entity({ name: "roles" })
 export class Role {
     @PrimaryGeneratedColumn()
     id: number;
@@ -17,10 +17,10 @@ export class Role {
     updatedAt: Date;
 
     @ManyToMany(() => User, (user) => user.roles)
-    @JoinTable({ name: "user_roles" })
+    @JoinTable({ name: "user_roles", joinColumn: { name: "role_id" }, inverseJoinColumn: { name: "user_id" } })
     users: User[];
 
     @ManyToMany(() => Permission, (permission) => permission.roles)
-    @JoinTable({ name: "permission_role" })
+    @JoinTable({ name: "permission_role", joinColumn: { name: "role_id" }, inverseJoinColumn: { name: "permission_id" } })
     permissions: Permission[];
 }

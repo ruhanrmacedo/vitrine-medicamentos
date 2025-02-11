@@ -1,14 +1,14 @@
 import { Request, Response, Router } from "express";
 import { AppDataSource } from "../config/data-source";
 import { Medicamento } from "../entities/Medicamento";
-import { authMiddleware } from "../middleware/auth";
+import { authenticate } from "../middleware/auth";
 import { Like } from "typeorm";
 
 const medicamentosRouter = Router();
 const medicamentoRepository = AppDataSource.getRepository(Medicamento);
 
 // Middleware para autenticação
-medicamentosRouter.use(authMiddleware);
+medicamentosRouter.use(authenticate(["listar_medicamentos"]));
 
 // Rota para cadastrar medicamentos com usuário autenticado
 medicamentosRouter.post("/", async (req: Request, res: Response) => {

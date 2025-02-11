@@ -26,7 +26,11 @@ export const authenticate = (listaPermissoes: string[]) => {
             // Decodifica o token
             const payload = jwt.verify(token, jwtSecret) as JwtPayload & { id: number, roles: string };
 
+            console.log("Payload JWT:", payload);
+
             const roles: Role[] = JSON.parse(payload.roles || "[]");
+
+            console.log("Roles do usuário:", roles);
 
             let hasPermission = false;
 
@@ -38,6 +42,7 @@ export const authenticate = (listaPermissoes: string[]) => {
                 }
 
                 role.permissions.forEach((permission: Permission) => {
+                    console.log("Permissão do usuário:", permission.description);
                     if (listaPermissoes.includes(permission.description)) {
                         hasPermission = true;
                         return;
